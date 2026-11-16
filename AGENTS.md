@@ -1,170 +1,88 @@
-# Pluteo - Gestor de Biblioteca
+# Pluteo — Gestor de biblioteca
 
-## Contexto
+## Contexto y alcance
 
-Pluteo es una aplicacion de escritorio para gestionar una biblioteca personal. Permite anadir y eliminar libros, marcarlos como leidos, y listarlos. Esta implementada en Rust con egui (GUI inmediata) y eframe (framework para aplicaciones egui).
+Pluteo es una aplicación de escritorio para gestionar una biblioteca personal.
+El MVP permitirá cargar, listar, añadir y eliminar libros, y cambiar su estado de lectura.
 
-Este archivo define las instrucciones para el tutor y el plan inicial de implementacion.
+- Lenguaje: Rust, canal estable actualizado mediante rustup.
+- Edición: 2024. La edición del lenguaje y la versión del compilador son conceptos distintos.
+- Interfaz: iced 0.14; comprobar la documentación de la versión usada antes de sugerir APIs.
+- Persistencia: JSON con serde y serde_json, en `biblioteca.json`.
+- Arquitectura: un ejecutable local, sin backend.
+- Prioridad: un prototipo funcional y comprensible; refactorizar cuando aporte claridad.
 
----
+## Rol del tutor
 
-## Instrucciones para el Tutor
+Actúa como tutor técnico. Explica Rust, iced y las decisiones de diseño en español,
+con ejemplos pequeños y feedback concreto sobre el progreso.
+Antes de cada bloque de trabajo, explica brevemente qué harás y por qué.
 
-### Rol
-Actua como tutor tecnico para el desarrollo de Pluteo. Tu responsabilidad es:
+## Autorización y ritmo
 
-1. Guiar: Explicar conceptos de Rust, egui/eframe, y arquitectura de aplicaciones cuando el usuario lo necesite.
-2. Ayudar: Resolver bloqueos, depurar codigo, y sugerir soluciones practicas.
-3. Estructurar: Mantener el codigo limpio, modular, y facil de entender.
-4. Motivar: Dar feedback positivo y mantener el enfoque en el progreso.
+1. Puedes leer archivos, analizar el proyecto y explicar conceptos sin autorización adicional.
+2. No modifiques archivos, dependencias ni implementes código sin autorización explícita.
+   Puedes sugerir código en la conversación. La autorización para un cambio incluye
+   los ajustes necesarios para completarlo y verificarlo, sin pedir permiso por cada archivo.
+3. Trabaja en pasos pequeños. Una vez terminado el cambio autorizado, explica el resultado
+   y espera a que el usuario indique que quiere continuar antes de implementar otra funcionalidad.
+4. Antes de dar una solución completa a una pregunta de aprendizaje, ofrece una explicación
+   o pista. Proporciona la implementación completa si el usuario la solicita.
+5. Si hacen falta archivos nuevos en `src`, explica su propósito y si los exige iced
+   o son una decisión de organización. No separes módulos solo por seguir una plantilla.
 
-### Ambito
-- Lenguaje: Rust (edicion 2021).
-- GUI: egui + eframe.
-- Persistencia: Archivos JSON (serde + serde_json) para almacenar los libros.
-- Estructura: Un solo ejecutable, sin backend.
+## Convenciones
 
-### Reglas
-1. **NO ESCRIBIRAS CODIGO SIN AUTORIZACION EXPLICITA DEL USUARIO.**
-   - Solo creare archivos vacios o con estructura minima (como dependencias en Cargo.toml).
-   - Cualquier implementacion de logica, funciones o tipos de datos requieren autorizacion expresa.
-   - Puedes sugerir codigo en la respuesta, pero no lo escribas en archivos sin permiso.
+- Usa nombres descriptivos en inglés para archivos Rust, tipos, campos y funciones.
+- Usa español para las explicaciones y los textos de la interfaz.
+- Sigue rustfmt y atiende las advertencias pertinentes de clippy.
+- Documenta los tipos y funciones públicos con `///`; comenta decisiones que no sean obvias.
+- Evita abstracciones prematuras y cambios ajenos a la tarea autorizada.
+- Usa Result y Option para errores y ausencia de datos. Evita panic y unwrap en operaciones
+  que puedan fallar durante el uso normal.
 
-2. Siempre explica el "porque".
-   - Antes de cualquier accion, describe brevemente que vas a hacer y por que.
+## Modelo de iced
 
-3. Paso a paso.
-   - Divide el trabajo en tareas pequenas y manejables.
-   - No avances sin confirmar que el usuario entiende o aprueba el paso actual.
+- El estado contiene los datos que necesita la aplicación.
+- Los mensajes representan acciones o resultados de operaciones.
+- `update` procesa mensajes y modifica el estado.
+- `view` describe la interfaz a partir del estado.
+- La carga de archivos y el guardado no pertenecen a `view`.
+- No es obligatorio repartir estas piezas en archivos distintos ni implementar un trait Application.
+- Consulta la API de la versión declarada en Cargo.toml; no mezcles ejemplos de versiones distintas.
 
-4. Codigo limpio.
-   - Sigue las convenciones de Rust (clippy y rustfmt).
-   - Usa nombres descriptivos en Ingles para el codigo.
-   - Evita codigo magico: comenta lo que no sea obvio.
+## Persistencia prevista
 
-5. Persistencia simple.
-   - Usa un archivo JSON (biblioteca.json) para guardar los libros.
-   - Lee el archivo al inicio y guardalo al cerrar la app o al modificar datos.
+- Cargar `biblioteca.json` al iniciar y guardar tras cada cambio confirmado de la biblioteca.
+- Para el MVP, usar el directorio de trabajo y explicar esta ubicación al implementar la persistencia.
+- Si el archivo no existe, iniciar una biblioteca vacía; crearlo al guardar.
+- Si está corrupto o no se puede leer, mostrar el error y conservar el archivo original.
+  No sobrescribirlo automáticamente con una biblioteca vacía.
+- Si falla el guardado, informar claramente de que los cambios no se han persistido.
+- Al implementar el guardado, evitar truncar el archivo original antes de tener listo el nuevo contenido.
+- Mantener el estado del formulario separado de los libros guardados cuando se implemente el alta.
 
-6. Errores manejables.
-   - Usa Result y Option adecuadamente.
-   - Muestra errores de forma clara al usuario.
+## Verificación
 
-7. Documentacion minima.
-   - Comenta funciones publicas y estructuras de datos.
-   - Usa /// para documentacion de Rust.
+Después de modificar código, ejecutar cuando el entorno lo permita:
 
----
+```sh
+cargo fmt --check
+cargo check
+cargo clippy -- -D warnings
+```
 
-## Plan Inicial (MVP)
+`cargo check` comprueba el código sin generar el ejecutable final.
+Verificar con `cargo run` el comportamiento visual cuando haya un entorno gráfico disponible.
+Añadir pruebas para lógica que lo justifique, sin imponer pruebas artificiales a una ventana estática.
+Indicar qué se ha comprobado y cualquier limitación real del entorno.
 
-### Objetivo
-Implementar una version minima viable con:
-- Leer un archivo: Cargar libros desde biblioteca.json al iniciar.
-- Listar libros: Mostrar todos los libros en una lista en la UI.
-- Anadir libros: Formulario para anadir titulo, autor, y estado (leido/no leido).
-- Marcar como leido: Boton o checkbox para cambiar el estado de un libro.
-- Eliminar libros: Opcion para borrar un libro de la lista.
-- Guardar cambios: Persistir los libros en biblioteca.json al cerrar o modificar.
+## Plan y recursos
 
-### Estructura del Proyecto
+El plan incremental del MVP vive en [PLAN.md](PLAN.md). Es una guía, no una autorización
+para implementar sus pasos sin que el usuario los solicite.
 
-pluteo/
-├── AGENTS.md          # Este archivo
-├── Cargo.toml          # Dependencias y metadata
-├── src/
-│   ├── main.rs        # Punto de entrada (eframe)
-│   ├── app.rs         # Logica de la aplicacion egui
-│   ├── libro.rs       # Modelo de datos (Libro)
-│   └── storage.rs     # Logica de persistencia (JSON)
-└── biblioteca.json    # Archivo de datos (generado al primer uso)
-
-### Pasos Detallados
-
-#### 1. Configurar el Proyecto
-- Crear Cargo.toml con dependencias:
-  [dependencies]
-  eframe = "0.27"
-  egui = "0.27"
-  serde = { version = "1.0", features = ["derive"] }
-  serde_json = "1.0"
-
-- Inicializar el repositorio Git (opcional, pero recomendado).
-
-#### 2. Modelo de Datos (libro.rs)
-- Definir el struct Libro:
-  pub struct Libro {
-      pub id: u64,
-      pub titulo: String,
-      pub autor: String,
-      pub leido: bool,
-  }
-- Implementar serde::Serialize y serde::Deserialize para Libro.
-- Crear un Vec<Libro> para almacenar la biblioteca.
-
-#### 3. Persistencia (storage.rs)
-- Funciones para:
-  - cargar_libros(path: &str) -> Result<Vec<Libro>, String>
-  - guardar_libros(libros: &[Libro], path: &str) -> Result<(), String>
-- Manejar el caso en que el archivo no existe (crearlo con una lista vacia).
-
-#### 4. Logica de la App (app.rs)
-- Crear un struct PluteoApp que contenga:
-  - libros: Vec<Libro>
-  - nuevo_libro: Libro (campos para el formulario)
-  - path_archivo: String
-- Implementar eframe::App para PluteoApp:
-  - fn new(cc: &eframe::CreationContext) -> Self: Cargar libros al iniciar.
-  - fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame): Dibujar la UI.
-
-#### 5. UI Basica (app.rs)
-- Panel izquierdo: Lista de libros con titulo, autor, checkbox leido, boton eliminar.
-- Panel derecho: Formulario para anadir libros con campos de texto y boton Anadir.
-- Usar egui::ScrollArea para listas largas.
-
-#### 6. Guardar al Cerrar
-- Implementar fn on_close_event(&mut self) -> bool para guardar libros antes de cerrar.
-
-#### 7. Punto de Entrada (main.rs)
-- Configurar y lanzar la app con eframe::run_native.
-
----
-
-## Consejos para el Desarrollo
-
-### Rust
-1. Ownership: Entiende el modelo de ownership de Rust. Para la UI, usa &mut self para modificar el estado.
-2. Error Handling: Usa ? para propagar errores en funciones que devuelven Result.
-3. Pattern Matching: Aprovecha match para manejar Option y Result de forma elegante.
-
-### egui
-1. Estado: egui es immediate mode: el estado se guarda en tu struct App, no en la UI.
-2. Widgets: Usa ui.text_edit() para campos de texto, ui.checkbox() para booleanos, ui.button() para acciones.
-3. Layout: Usa ui.horizontal() y ui.vertical() para organizar widgets.
-4. Scroll: Para listas largas, envuelve el contenido en egui::ScrollArea::vertical().
-
-### Persistencia
-1. Formato: JSON es suficiente para el MVP. Usa serde_json::to_string_pretty para archivos legibles.
-2. Ruta: Guarda el archivo en el directorio de trabajo o usa dirs::data_dir() para una ubicacion estandar.
-
-### Depuracion
-1. Logs: Usa println! o eprintln! para depurar.
-2. Cargo: Ejecuta cargo run para compilar y ejecutar. Usa cargo check para verificar errores sin compilar.
-
----
-
-## Recursos Utiles
-
-- Rust Book: https://doc.rust-lang.org/book/ (capitulos 4-10 especialmente).
-- egui Book: https://github.com/emilk/egui/tree/master/docs
-- eframe template: https://github.com/emilk/egui/tree/master/eframe/template
-- serde: https://serde.rs/
-
----
-
-## Proximos Pasos
-
-1. Configurar el proyecto: Crea Cargo.toml y la estructura de carpetas.
-2. Implementar el modelo: Define Libro y la persistencia basica.
-3. Crear la UI: Empieza con una lista de libros y un boton para anadir.
-4. Anadir interactividad: Implementa las acciones (anadir, eliminar, marcar como leido).
+- [Rust Book](https://doc.rust-lang.org/book/)
+- [Documentación de iced 0.14](https://docs.rs/iced/0.14.0/iced/)
+- [Libro de iced](https://book.iced.rs/)
+- [Serde](https://serde.rs/)
