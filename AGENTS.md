@@ -31,6 +31,27 @@ Antes de cada bloque de trabajo, explica brevemente qué harás y por qué.
 5. Si hacen falta archivos nuevos en `src`, explica su propósito y si los exige iced
    o son una decisión de organización. No separes módulos solo por seguir una plantilla.
 
+## Inicio y cierre de sesión
+
+Al abrir una sesión, lee [ESTADO.md](ESTADO.md) y ejecuta desde la raíz del repositorio:
+
+```sh
+git status --short --branch
+git log -1 --oneline
+```
+
+Estos comandos muestran los cambios locales y el último commit de la rama actual.
+Al cambiar de equipo, con el árbol de trabajo limpio, usa `git pull --ff-only`
+para traer los cambios publicados. Vuelve a leer `ESTADO.md` después de sincronizar.
+Si hay cambios locales o la rama ha divergido, revisa el estado antes de continuar.
+
+Al cerrar una sesión con avances, actualiza `ESTADO.md` con lo que funciona,
+las comprobaciones realizadas, los pendientes y el siguiente paso. Cuando se
+registre el avance, incluye el estado en el mismo commit que los cambios que
+describe. Publica ese commit con `git push` para poder recuperarlo en otro equipo.
+Consulta `git log` para ver el historial y [PLAN.md](PLAN.md) para el orden previsto
+de las funcionalidades.
+
 ## Convenciones
 
 - Usa nombres descriptivos en inglés para archivos Rust, tipos, campos y funciones.
