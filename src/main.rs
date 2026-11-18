@@ -30,7 +30,7 @@ impl Default for PluteoApp {
     }
 }
 
-// No hay acciones de usuario en este prototipo, por eso no hay variantes.
+// There are no user actions for now. Thus, no variants here.
 #[derive(Debug, Clone)]
 enum Message {}
 
